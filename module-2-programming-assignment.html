@@ -1,0 +1,380 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 2 Programming Assignment</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the no prototype approach.
+//       This is what the book uses, so you can copy it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//--------------------------//
+// The stack data structure //
+//--------------------------//
+console.log("The stack data structure");
+
+// 1. Implement the stack data structure described in the book. Instead of
+//    using 'let items = [];' use 'var items = []'. Note that this
+//    implementation does not use the prototype (see project).
+
+function Stack() {
+  var items = [];
+
+  this.push = function(element) {
+    items.push(element);
+  }
+  this.pop = function() {
+    if (items.length === 0) {
+      return undefined;
+    }
+
+    return items.pop();
+  }
+  this.peek = function() {
+    return items[items.length - 1];
+  }
+  this.isEmpty = function() {
+    return items.length === 0;
+  }
+  this.clear = function() {
+    items.length = 0;
+    console.log("Stack cleared.");
+  }
+  this.size = function() {
+    return items.length;
+  }
+}
+
+// 2. Write a simple test program that shows your stack works.
+
+let vehicleTypeStack = new Stack();
+
+// Create array of vehicle types and a loop to push them into the stack
+let vehicleTypeArray = ["car", "bus", "truck", "van", "SUV", "motorcycle"];
+
+for (let i = 0; i < vehicleTypeArray.length; i++) {
+  vehicleTypeStack.push(vehicleTypeArray[i]);
+}
+console.log(`${vehicleTypeArray.length} elements added to the stack.`);
+
+// While the stack is not empty, print size of the stack, peek at next element, and then pop it
+while (!vehicleTypeStack.isEmpty()) {
+  console.log(`Stack size: ${vehicleTypeStack.size()}`);
+  console.log(`Next element: ${vehicleTypeStack.peek()}`);
+  console.log(`Deleted element: ${vehicleTypeStack.pop()}`);
+}
+
+// Repopulate stack, use clear method, and check if stack size is 0 to make sure it functions correctly
+for (let i = 0; i < vehicleTypeArray.length; i++) {
+  vehicleTypeStack.push(vehicleTypeArray[i]);
+}
+console.log(`${vehicleTypeArray.length} elements added to the stack.`);
+console.log(`Stack size: ${vehicleTypeStack.size()}`);
+vehicleTypeStack.clear();
+console.log(`Stack size: ${vehicleTypeStack.size()}`);
+
+
+
+//----------------------------------//
+// ECMAScript 6 and the Stack class //
+//----------------------------------//
+console.log("ECMAScript 6 and the Stack class");
+
+// Skip.
+
+
+
+//-------------------------------//
+// Solving problems using stacks //
+//-------------------------------//
+console.log("Solving problems using stacks");
+
+// 1. Use the prompt to ask for a decimal number. Then write a loop that divides
+//    the number by two in every iteration and prints the remainder (0 or 1).
+//    For example, if the number is 5 the remainder is 1 and the number in the
+//    next iteration should be 2 (5/2 rounded down).
+
+let decimalNum = Number(prompt(`Enter a decimal number: `));
+let num = decimalNum;
+let remainder;
+while (num > 0) {
+  remainder = Math.floor(num % 2);
+  console.log(remainder);
+  num = Math.floor(num / 2);
+}
+
+// 2. The algorithm in (1) can be used to convert a decimal number to a binary
+//    number but there is one issue. What is the problem?
+
+//    The numbers are returned in reverse order so, by instead storing them in a stack, they can be retrieved in the correct order.
+
+// 3. Solve the problem in (2) using a stack.
+
+function decimalToBinary(decimalNum) {
+  let remainderStack = new Stack();
+  let num = decimalNum;
+  let rem;
+  let binString = "";
+
+  while (num > 0) {
+    rem = Math.floor(num % 2);
+    remainderStack.push(rem);
+    num = Math.floor(num / 2);
+  }
+
+  while (!remainderStack.isEmpty()) {
+    binString += remainderStack.pop().toString();
+  }
+  return binString;
+}
+
+let binaryNum = decimalToBinary(decimalNum);
+console.log(`${decimalNum} converted to binary is ${binaryNum}`);
+
+
+//--------------------------//
+// The queue data structure //
+//--------------------------//
+console.log("The queue data structure");
+
+// 1. Describe the difference between a stack and a queue. Give one example
+//    where a stack is appropriate and one example where a queue is
+//    appropriate (that has not yet been discussed in class).
+
+//    A stack uses the LIFO structure, or last in, first out. Retrieving a value from the stack will pull the most recently added value first. 
+//    A queue uses the FIFO structure which means first in, first out. A queue functions like a line, where the first value entered passes through the queue and is likewise the first value to exit. 
+
+//    Stacks are used by compilers to ensure that syntax symbols are paired correctly when parsing code. The opening symbol is pushed into the stack and, if the closing symbol matches, it triggers a pop. 
+//    If the closing symbol does not match the opening symbol or the stack is not empty, the compiler considers the code invalid.
+
+//    Queues are used by websites to manage HTTP requests. Each request is entered into the queue until the server is able to handle it.
+
+//------------------//
+// Creating a queue //
+//------------------//
+console.log("Creating a queue");
+
+// 1. Implement the queue data structure described in the book. Instead of
+//    using 'let items = [];' use 'var items = []'. Note that this
+//    implementation does not use the prototype (see project).
+
+function Queue() {
+  var items = [];
+
+  this.enqueue = function(element) {
+    items.push(element);
+  }
+  this.dequeue = function() {
+    if (this.isEmpty()) {
+      return undefined;
+    }
+    return items.shift();
+  }
+  this.peek = function() {
+    if (this.isEmpty()) {
+      return undefined;
+    }
+    return items[0];
+  }
+  this.isEmpty = function() {
+    return items.length === 0;
+  }
+  this.clear = function() {
+    items.length = 0;
+    console.log("Queue cleared.");
+  }
+  this.size = function() {
+    return items.length;
+  }
+}
+
+// 2. Write a simple test program that shows your queue works.
+let alphabeticalNameList = new Queue();
+
+// Create array of names sorted alphabetically and a loop to enqueue them
+let nameArray = ["Adam", "Bob", "Carl", "Derek", "Eric", "Fred", "George"];
+
+for (let i = 0; i < nameArray.length; i++) {
+  alphabeticalNameList.enqueue(nameArray[i]);
+}
+console.log(`${nameArray.length} elements added to the queue.`);
+
+// While the queue is not empty, print size of the queue, peek at next element, and then dequeue it
+while (!alphabeticalNameList.isEmpty()) {
+  console.log(`Queue size: ${alphabeticalNameList.size()}`);
+  console.log(`Next element: ${alphabeticalNameList.peek()}`);
+  console.log(`Deleted element: ${alphabeticalNameList.dequeue()}`);
+}
+
+// Repopulate queue, use clear method, and check if queue size is 0 to make sure it functions correctly
+for (let i = 0; i < nameArray.length; i++) {
+  alphabeticalNameList.enqueue(nameArray[i]);
+}
+console.log(`${nameArray.length} elements added to the queue.`);
+console.log(`Queue size: ${alphabeticalNameList.size()}`);
+alphabeticalNameList.clear();
+console.log(`Queue size: ${alphabeticalNameList.size()}`);
+
+//--------------------//
+// The priority queue //
+//--------------------//
+console.log("The priority queue");
+
+// The following class is used below.
+
+function QueueElement(element, priority) {
+  this.element = element;
+  this.priority = priority;
+}
+
+// 1. Finish the implementation below for the priority queue. Note that this
+//    implementation does not use the prototype.
+function PriorityQueue() {
+  var items = [];
+
+    this.enqueue = function(element, priority) {
+      var queueElement = new QueueElement(element, priority);
+//  Loop through and compare priority number of element. If lower than any of the existing elements in the array, splice at that position without deleting any values and return to caller
+      for (let i = 0; i < items.length; i++) {
+        if (queueElement.priority < items[i].priority) {
+          items.splice(i, 0, queueElement);
+          return;
+          }
+        }
+//  If priority number is higher than all existing elements, push to end of queue
+      items.push(queueElement);
+    }
+
+    this.dequeue = function() {
+      if (this.isEmpty()) {
+        return undefined;
+      }
+
+//  Shift removes the front element of the array which works for dequeue in a priority queue
+      return items.shift();
+    }
+
+    this.peek = function() {
+      if (this.isEmpty()) {
+        return undefined;
+      }
+      return items[0];
+    } 
+
+    this.isEmpty = function() {
+      return (items.length === 0);
+    }
+
+    this.clear = function() {
+      items.length = 0;
+      console.log("Queue cleared.");
+    }
+
+    this.size = function() {
+      return items.length;
+    }
+
+//  This is a helper function that is useful for printing
+    this.print = function() {
+      for (var i = 0; i < items.length; i++) {
+        console.log(`${items[i].element} - ${items[i].priority}`);
+      }
+    };
+  }
+
+
+// 2. Write a simple test that makes sure the priority queue works as expected.
+let prioQueue = new PriorityQueue();
+
+// Create array which contains animal names and priority numbers to be sorted into the queue
+let animalArray = [{name: "Cow", priority: 5},
+                   {name: "Pig", priority: 3},
+                   {name: "Moose", priority: 2},
+                   {name: "Bear", priority: 6},
+                   {name: "Dog", priority: 4},
+                   {name: "Octopus", priority: 1},
+                   {name: "Rhino", priority: 7}];
+
+//  Loop to enqueue the array
+for (let i = 0; i < animalArray.length; i++) {
+  prioQueue.enqueue(animalArray[i].name, animalArray[i].priority);
+}
+console.log(`${animalArray.length} elements added to the queue.`);
+prioQueue.print();
+
+// While the queue is not empty, print size of the queue, peek at next element, and then dequeue it
+while (!prioQueue.isEmpty()) {
+  console.log(`Queue size: ${prioQueue.size()}`);
+  console.log(`Next element: ${prioQueue.peek().element}`);
+  console.log(`Deleted element: ${prioQueue.dequeue().element}`);
+}
+
+// Repopulate queue, use clear method, and check if queue size is 0 to make sure it functions correctly
+for (let i = 0; i < animalArray.length; i++) {
+  prioQueue.enqueue(animalArray[i].name, animalArray[i].priority);
+}
+console.log(`${animalArray.length} elements added to the queue.`);
+console.log(`Queue size: ${prioQueue.size()}`);
+prioQueue.clear();
+console.log(`Queue size: ${prioQueue.size()}`);
+
+
+//---------------------------------//
+// The circular queue - Hot Potato //
+//---------------------------------//
+console.log("The circular queue - Hot Potato");
+
+// 1. Finish the implementation for the hot potato game. nameList contains the
+//    names of the participants, and num is how many times the potato is passed
+//    before a participant is ejected from the game (the one that holds the
+//    potato). Note that this is effectively a simulation of the game.
+
+function hotPotato(nameList, num) {
+  let queue = new Queue();
+  let elimList = [];
+
+  // add the names to the queue
+  for (let i = 0; i < nameList.length; i++) {
+    queue.enqueue(nameList[i]);
+  }
+
+  // while there is more than one name in the queue
+  // dequeue and enqueue a name num times
+  while (queue.size() > 1) {
+    for (let i = 0; i < num; i++) {
+      queue.enqueue(queue.dequeue());
+    }
+  // then dequeue one more time, which is the participant that is ejected
+    elimList.push(queue.dequeue());
+  }
+  // /while (end of while loop)
+
+  // the person that remains in the queue wins
+  return {
+    eliminated: elimList,
+    winner: queue.dequeue()
+  };
+}
+
+// 2. Test the code in (1).
+
+// Enqueue array of player names and test with different numbers which gives two different winners
+let playerList = ["Jim", "Bill", "Sarah", "Mary", "Alex", "Ralph"];
+console.log(hotPotato(playerList, 4));
+console.log(hotPotato(playerList, 12));
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
