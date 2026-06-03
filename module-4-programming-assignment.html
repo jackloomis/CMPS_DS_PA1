@@ -1,0 +1,568 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 4 Programming Assignment</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the no prototype approach.
+//       This is what the book uses, so you can copy it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//----------------//
+// Creating a set //
+//----------------//
+console.log("Creating a set");
+
+// 1. Finish the implemention of the set data structure below. Note that this
+//    implementation does not use the prototype (see homework).
+
+function Set() {
+  var items = {}; // note that this is an object instead of an array
+
+  this.add = function(value) {
+    if (!this.has(value)) {
+      items[value] = value;
+    }
+  };
+
+  this.delete = function(value) {
+    if (this.has(value)) {
+      delete items[value];
+      return true;
+    }
+    return false;
+  };
+
+  this.has = function(value) {
+    return Object.prototype.hasOwnProperty.call(items, value);
+  };
+
+  this.clear = function() {
+    items = {};
+  };
+
+  this.size = function() {
+    return Object.keys(items).length;
+  };
+
+  this.values = function() {
+    return Object.values(items);
+  };
+
+  this.union = function(otherSet) {
+    const unionSet = new Set();
+    this.values().forEach(value => unionSet.add(value));
+    otherSet.values().forEach(value => unionSet.add(value));
+    return unionSet;
+  };
+
+  this.intersection = function(otherSet) {
+    const intersectSet = new Set();
+    const values = this.values();
+    const otherValues = otherSet.values();
+    let biggerSet = values;
+    let smallerSet = otherValues;
+
+    if (otherValues.length - values.length < 0) {
+      biggerSet = otherValues;
+      smallerSet = values;
+    }
+    for (let i = 0; i < smallerSet.length; i++) {
+      if (biggerSet.includes(smallerSet[i])) {
+        intersectSet.add(smallerSet[i]);
+      }
+    }
+    return intersectSet;
+  };
+
+  this.difference = function(otherSet) {
+    const differenceSet = new Set();
+    this.values().forEach(value => {
+      if (!otherSet.has(value)) {
+        differenceSet.add(value);
+      }
+    });
+    return differenceSet;
+  };
+
+  this.isSubsetOf = function(otherSet) {
+    if (this.size() > otherSet.size()) {
+      return false;
+    }
+    let isSubset = true;
+    this.values().forEach(value => {
+      if (!otherSet.has(value)) {
+        isSubset = false;
+      }
+    });
+    return isSubset;
+  };
+}
+
+//----------------//
+// Set operations //
+//----------------//
+console.log("Set operations");
+
+// 1. Implement the union set function in Set above.
+
+let a = "a";
+let b = "b";
+let c = "c";
+let d = "d";
+const set = new Set();
+set.add(a);
+set.add(b);
+set.add(c);
+const set2 = new Set();
+set2.add(b);
+set2.add(c);
+set2.add(d);
+let set3 = new Set();
+
+set3 = set.union(set2);
+console.log(set.values() + " combined with " + set2.values() + " is " + set3.values());
+
+
+// 2. Implement the intersection set function in Set above.
+
+console.log("The intersection of " + set.values() + " and " + set2.values() + " is " + set.intersection(set2).values());
+
+
+// 3. Implement the set difference function in Set above.
+
+console.log("The difference between " + set.values() + " and " + set2.values() + " is " + set.difference(set2).values());
+console.log("The difference between " + set2.values() + " and " + set.values() + " is " + set2.difference(set).values());
+
+
+// 4. Implement the subset function in Set above.
+
+console.log("Is " + set.values() + " a subset of " + set2.values() + "? \n" + set.isSubsetOf(set2));
+
+//    Remove d from set2 and a from set so both contain ["b", "c"]
+set2.delete(d);
+set.delete(a);
+
+//    Should now be a subset since both sets contain the same elements
+console.log("Is " + set.values() + " a subset of " + set2.values() + "? \n" + set.isSubsetOf(set2));
+
+
+//--------------//
+// Dictionaries //
+//--------------//
+console.log("Dictionaries");
+
+// 1. Finish the implemention of the dictionary data structure below. Note that
+//    this implementation does not use the prototype (see homework).
+//    NOTE: This is very similar to the set data structure.
+
+function Dictionary() {
+  // store all elements in the items object
+  var items = {};
+
+  // pair constructor
+  this.ValuePair = function(key, value) {
+    this.key = key;
+    this.value = value;
+    this.toString = function(){
+      return `[#${this.key}: ${this.value}]`;
+    }
+  }
+
+  this.defaultToString = function(item) {
+    if (item === null) {
+      return "NULL";
+    }
+    else if (item === undefined) {
+      return "UNDEFINED";
+    }
+    else if (typeof item === "string" || item instanceof String) {
+      return `${item}`;
+    }
+    return item.toString();
+  };
+
+  this.set = function(key, value) {
+    if (key !== null && value !== null) {
+      const itemKey = this.defaultToString(key);
+      items[itemKey] = new this.ValuePair(key, value);
+      return true;
+    }
+    return false;
+  };
+
+  this.delete = function(key) {
+    if (this.has(key)) {
+      const itemKey = this.defaultToString(key);
+      delete items[itemKey];
+      return true;
+    }
+    return false;
+  };
+
+  this.has = function(key) {
+    return items[this.defaultToString(key)] !== undefined;
+  };
+
+  this.get = function(key) {
+    const valueKey = items[this.defaultToString(key)];
+    return valueKey === undefined ? undefined : valueKey.value;
+  };
+
+  this.clear = function() {
+    items = {};
+  };
+
+  this.size = function() {
+    return Object.keys(items).length;
+  };
+
+  this.keys = function() {
+    return Object.keys(items);
+  };
+
+  this.values = function() {
+    return Object.values(items);
+  };
+
+  this.getItems = function() {
+    return items;
+  };
+}
+
+
+// 2. Write some tests that show that your code works.
+
+//    Create new dictionary, populate, and loop to print each element to the console
+const vehicleDictionary = new Dictionary();
+vehicleDictionary.set(7, "Ford Focus");
+vehicleDictionary.set(11, "Toyota Camry");
+vehicleDictionary.set(17, "Jeep Wrangler");
+vehicleDictionary.set(25, "Tesla Cybertruck");
+vehicleDictionary.values().forEach(element => console.log(element.toString()));
+
+//    Get value by key
+console.log("Value with key of 7 is: " + vehicleDictionary.get(7));
+
+//    Delete value and try to retrieve it by key again (should be undefined)
+vehicleDictionary.delete(7);
+console.log("Value with key of 7 is: " + vehicleDictionary.get(7));
+
+//    Check size of dictionary, clear, check size again
+console.log("The dictionary contains " + vehicleDictionary.size() + " elements.");
+vehicleDictionary.clear();
+console.log("The dictionary contains " + vehicleDictionary.size() + " elements.");
+
+
+// The hash table //
+//----------------//
+console.log("The hash table");
+
+// NOTE: In the Dictionary we used items to store our key-value pairs. This is
+//       cheating a little bit because we do not exactly know how the browser
+//       implements storing these mappings (e.g., the approach from the slides
+//       or something more sophisticated like a hash table). We will now
+//       explicitly use hash tables.
+
+//-----------------------------------------------------------------------------
+// we need this below, scroll down for questions
+//-----------------------------------------------------------------------------
+function ValuePair(key, value) {
+  this.key = key;
+  this.value = value;
+  this.toString = function() {
+    return "[" + this.key + " - " + this.value + "]";
+  };
+};
+
+function Node(element) {
+  this.element = element;
+  this.next = null;
+}
+
+function LinkedList() {
+  this.length = 0;
+  this.head = null;
+}
+
+LinkedList.prototype.append = function(element) {
+  var node = new Node(element);
+  if (this.head === null) {
+    this.head = node;
+  }
+  else {
+    var tmp = this.head;
+    while (tmp.next !== null) {
+      tmp = tmp.next;
+    }
+    tmp.next = node;
+  }
+  this.length++;
+};
+
+LinkedList.prototype.insert = function(position, element) {
+  var node = new Node(element);
+  if (position === 0) {
+    var oldHead = this.head;
+    this.head = node;
+    this.head.next = oldHead;
+  }
+  else {
+    var tmp = this.head;
+    for (var i = 0; i < position-1; i++) {
+      tmp = tmp.next;
+    }
+    node.next = tmp.next;
+    tmp.next = node;
+  }
+  this.length++;
+};
+
+LinkedList.prototype.removeAt = function(position) {
+  var element = null;
+  if (position === 0) {
+    element = this.head.element;
+    this.head = this.head.next;
+  }
+  else {
+    var tmp = this.head;
+    for (var i = 0; i < position-1; i++) {
+      tmp = tmp.next;
+    }
+    element = tmp.next.element;
+    var prev = tmp;
+    var middle = tmp.next;
+    var next = middle.next;
+    prev.next = next;
+  }
+  this.length--;
+  return element;
+};
+
+LinkedList.prototype.remove = function(element) {
+  var position = this.indexOf(element);
+  return this.removeAt(position);
+};
+
+LinkedList.prototype.indexOf = function(element) {
+  var tmp = this.head;
+  for (var i = 0; i < this.length; i++) {
+    if (tmp.element === element) {
+      return i;
+    }
+    tmp = tmp.next;
+  }
+  return -1;
+};
+
+LinkedList.prototype.isEmpty = function() {
+  return this.length === 0;
+};
+
+LinkedList.prototype.size = function() {
+  var length = 0;
+  var tmp = this.head;
+  while (tmp !== null) {
+    length++;
+    tmp = tmp.next;
+  }
+  return length;
+};
+
+LinkedList.prototype.getHead = function() {
+  return this.head;
+}
+
+LinkedList.prototype.toString = function() {
+  var current = this.head;
+  var string = "List: ";
+  while (current) {
+    string += current.element + (current.next ? " -> " : "");
+    current = current.next;
+  }
+  return string;
+};
+
+LinkedList.prototype.print = function() {
+  console.log(this.toString());
+};
+//-----------------------------------------------------------------------------
+
+
+// 1. Finish the implemention of the hash table data structure below. Note that
+//    this implementation does not use the prototype (see project). You also
+//    do not yet have to resolve collisions (see question 3).
+
+function HashTable() {
+  // store all elements in the table array
+  var table = [];
+
+  // define hash function
+  function loseloseHashCode(key) {
+    var hash = 0;
+    for (var i = 0; i < key.length; i++) {
+      hash += key.charCodeAt(i);
+    }
+    return hash % 37;
+  }
+
+  this.put = function(key, value) {
+    if (key !== undefined && value !== undefined) {
+      const position = loseloseHashCode(key);
+      table[position] = new ValuePair(key, value);
+      return true;
+    }
+    return false;
+  };
+
+  this.remove = function(key) {
+    const position = loseloseHashCode(key);
+    const valuePair = table[position];
+    if (valuePair !== undefined) {
+      delete table[position];
+      return true;
+    }
+    return false;
+  };
+
+  this.get = function(key) {
+    const valuePair = table[loseloseHashCode(key)];
+    return valuePair === undefined ? undefined : valuePair.value;
+  };
+
+  this.print = function() {
+    // print the content of the hash table
+    for (var i = 0; i < table.length; i++) {
+      if (table[i] !== undefined) {
+        console.log(i + ": " + table[i]);
+      }
+    }
+  };
+}
+
+
+// 2. Write some tests that show that your code works.
+
+//    Populate and print hash table
+const emailTable = new HashTable();
+emailTable.put("Tim", "tim@email.com");
+emailTable.put("John", "john@email.com");
+emailTable.put("Sally", "sally@email.com");
+emailTable.put("Cheryl", "cheryl@email.com");
+emailTable.print();
+
+//    Remove elements from hash table and print again
+emailTable.remove("Tim");
+emailTable.remove("Sally");
+emailTable.print();
+
+//    Get removed element by key (should return undefined)
+console.log(emailTable.get("Sally"));
+//    Get element by key
+console.log(emailTable.get("John"));
+
+
+// 3. Modify your implementation to use separate chaining (for linked list, see
+//    above) for resolving collisions. We also need ValuePair, which is provided
+//    above.
+
+function separateChainingHashTable() {
+  var table = [];
+
+    // define hash function
+  function loseloseHashCode(key) {
+    var hash = 0;
+    for (var i = 0; i < key.length; i++) {
+      hash += key.charCodeAt(i);
+    }
+    return hash % 37;
+  };
+
+  this.put = function(key, value) {
+    if (key !== null && value !== null) {
+      const position = loseloseHashCode(key);
+      if (table[position] === undefined) {
+        table[position] = new LinkedList();
+      }
+      table[position].append(new ValuePair(key, value));
+      return true;
+    }
+    return false;
+  };
+
+  this.get = function(key) {
+    const position = loseloseHashCode(key);
+    const linkedList = table[position]; 
+    if (linkedList !== undefined && !linkedList.isEmpty()) {
+      let current = linkedList.getHead();   
+      while (current !== null) {
+        if (current.element.key === key) {
+          return current.element.value;
+        }
+        current = current.next;
+      } 
+    } 
+    return undefined;
+  };
+
+  this.remove = function(key) {
+    const position = loseloseHashCode(key);
+    const linkedList = table[position];
+    if (linkedList !== undefined && !linkedList.isEmpty()) {
+      let current = linkedList.getHead();
+      while (current !== null) {
+        if (current.element.key === key) {
+          linkedList.remove(current.element);
+          if (linkedList.isEmpty()) {
+            delete table[position];
+          }
+          return true;
+        }
+        current = current.next;
+      }
+    }
+    return false;
+  };
+
+  this.print = function() {
+    for (var i = 0; i < table.length; i++) {
+      if (table[i] !== undefined) {
+        console.log(i + ": " + table[i]);
+      }
+    }
+  };
+}
+
+//  Create, populate, and print table
+const collisionTestTable = new separateChainingHashTable();
+collisionTestTable.put("1", "John");
+collisionTestTable.put("2", "Kevin");
+collisionTestTable.put("3", "Kate");
+collisionTestTable.print();
+
+//  Add an element with a colliding key and print
+collisionTestTable.put("2", "Sarah");
+collisionTestTable.print();
+
+
+// 4. We will skip linear probing because the implementation in the book has
+//    quite a serious bug in it. Can you find the bug (don't spend much time)?
+//    LESSON: Be careful with trusting other people's code.
+
+//    The remove method fails to check for collision and shift the element's position to handle it. 
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
