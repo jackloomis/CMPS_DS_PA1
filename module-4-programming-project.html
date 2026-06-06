@@ -1,0 +1,331 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 4 Programming Project</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the prototype approach.
+//       This is not what the book uses, so you have to convert it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//---------//
+// Project //
+//---------//
+console.log("Project");
+
+// 1. Implement the set data structure using the prototype.
+
+function Set() {
+   this.items = {};
+}
+
+Set.prototype.add = function(value) {
+  if (!this.has(value)) {
+    this.items[value] = value;
+  }
+};
+
+Set.prototype.delete = function(value) {
+  if (this.has(value)) {
+    delete this.items[value];
+    return true;
+  }
+  return false;
+};
+
+Set.prototype.has = function(value) {
+  return Object.prototype.hasOwnProperty.call(this.items, value);
+};
+
+Set.prototype.clear = function() {
+  this.items = {};
+};
+
+Set.prototype.size = function() {
+  return Object.keys(this.items).length;
+};
+
+Set.prototype.values = function() {
+  return Object.values(this.items);
+};
+
+Set.prototype.union = function(otherSet) {
+  const unionSet = new Set();
+  this.values().forEach(value => unionSet.add(value));
+  otherSet.values().forEach(value => unionSet.add(value));
+  return unionSet;
+};
+
+Set.prototype.intersection = function(otherSet) {
+  const intersectSet = new Set();
+  const values = this.values();
+  const otherValues = otherSet.values();
+  let biggerSet = values;
+  let smallerSet = otherValues;
+
+  if (otherValues.length - values.length < 0) {
+    biggerSet = otherValues;
+    smallerSet = values;
+  }
+  for (let i = 0; i < smallerSet.length; i++) {
+    if (biggerSet.includes(smallerSet[i])) {
+      intersectSet.add(smallerSet[i]);
+    }
+  }
+  return intersectSet;
+};
+
+Set.prototype.difference = function(otherSet) {
+  const differenceSet = new Set();
+  this.values().forEach(value => {
+    if (!otherSet.has(value)) {
+      differenceSet.add(value);
+    }
+  });
+  return differenceSet;
+};
+
+Set.prototype.isSubsetOf = function(otherSet) {
+  if (this.size() > otherSet.size()) {
+    return false;
+  }
+  let isSubset = true;
+  this.values().forEach(value => {
+    if (!otherSet.has(value)) {
+      isSubset = false;
+    }
+  });
+  return isSubset;
+};
+
+
+// A professor keeps attendence of classes with the following results:
+// All students: Mary, Joe, Tim, Rosalee, Vincent, Caroline
+// Class 1: Rosalee, Joe, Mary, Tim
+// Class 2: Mary, Tim, Vincent, Rosalee, Caroline
+// Class 3: Caroline, Tim, Vincent, Rosalee, Joe
+
+// 2. Create a set of students for each class.
+
+const allStudentArray = ["Mary", "Joe", "Tim", "Rosalee", "Vincent", "Caroline"];
+const class1Array = ["Rosalee", "Joe", "Mary", "Tim"];
+const class2Array = ["Mary", "Tim", "Vincent", "Rosalee", "Caroline"];
+const class3Array = ["Caroline", "Tim", "Vincent", "Rosalee", "Joe"];
+const allStudents = new Set();
+const class1 = new Set();
+const class2 = new Set();
+const class3 = new Set();
+
+function populateClass(classNum, classArray) {
+  classArray.forEach(student => classNum.add(student));
+}
+
+populateClass(allStudents, allStudentArray);
+populateClass(class1, class1Array);
+populateClass(class2, class2Array);
+populateClass(class3, class3Array);
+
+
+// 3. Use set operations to get a list of students that attended at least
+//    one class.
+
+const class1Class2Union = class1.union(class2);
+const finalUnion = class1Class2Union.union(class3);
+console.log("The students who attended at least one class are: " + finalUnion.values());
+
+
+// 4. Use set operations to get a list of students that attended all classes.
+
+const class1Class2Intersect = class1.intersection(class2);
+const finalIntersect = class1Class2Intersect.intersection(class3);
+console.log("The students who attended all classes are: " + finalIntersect.values());
+
+
+// 5. Show that the results for (2) and (3) are a subset of all students.
+
+console.log("[" + finalUnion.values() + "] is a subset of [" + allStudents.values() + "]?\n" + finalUnion.isSubsetOf(allStudents));
+console.log("[" + finalIntersect.values() + "] is a subset of [" + allStudents.values() + "]?\n" + finalIntersect.isSubsetOf(allStudents));
+
+
+// 6. Implement the dictionary data structure using the prototype.
+
+function Dictionary() {
+  this.items = {};
+}
+
+Dictionary.prototype.ValuePair = function(key, value) {
+  this.key = key;
+  this.value = value;
+  this.toString = function(){
+    return `[#${this.key}: ${this.value}]`;
+  }
+};
+
+Dictionary.prototype.defaultToString = function(item) {
+  if (item === null) {
+    return "NULL";
+  }
+  else if (item === undefined) {
+    return "UNDEFINED";
+  }
+  else if (typeof item === "string" || item instanceof String) {
+    return `${item}`;
+  }
+  return item.toString();
+};
+
+Dictionary.prototype.set = function(key, value) {
+  if (key !== null && value !== null) {
+    const itemKey = this.defaultToString(key);
+    this.items[itemKey] = new this.ValuePair(key, value);
+    return true;
+  }
+  return false;
+};
+
+Dictionary.prototype.delete = function(key) {
+  if (this.has(key)) {
+    const itemKey = this.defaultToString(key);
+    delete this.items[itemKey];
+    return true;
+  }
+  return false;
+};
+
+Dictionary.prototype.has = function(key) {
+  return this.items[this.defaultToString(key)] !== undefined;
+};
+
+Dictionary.prototype.get = function(key) {
+  const valueKey = this.items[this.defaultToString(key)];
+  return valueKey === undefined ? undefined : valueKey.value;
+};
+
+Dictionary.prototype.clear = function() {
+  this.items = {};
+};
+
+Dictionary.prototype.size = function() {
+  return Object.keys(this.items).length;
+};
+
+Dictionary.prototype.keys = function() {
+  return Object.keys(this.items);
+};
+
+Dictionary.prototype.values = function() {
+  return Object.values(this.items);
+};
+
+Dictionary.prototype.getItems = function() {
+  return this.items;
+};
+
+Dictionary.prototype.print = function() {
+  this.values().forEach(pair => console.log(pair.toString()));
+};
+
+// 7. Complete the method below that adds all key-value pairs from one
+//    dictionary into another. See also the example below.
+
+Dictionary.prototype.merge = function(dict) {
+  dict.values().forEach(pair => this.set(pair.key, pair.value));
+};
+
+// Test your code by uncommenting these lines:
+var dict1 = new Dictionary();
+dict1.set("key1", "val1");
+dict1.set("key2", "val2");
+dict1.set("key3", "val3");
+var dict2 = new Dictionary();
+dict2.set("key3", "val3b");
+dict2.set("key4", "val4");
+dict1.merge(dict2);
+dict1.print(); // should contain key1-val1, key2-val2, key3-val3b, key4-val4
+
+// 8. Implement the hashtable data structure using the prototype.
+
+function HashTable() {
+  this.table = [];
+}
+
+HashTable.prototype.loseloseHashCode = function(key) {
+  let hash = 0;
+  for (var i = 0; i < key.length; i++) {
+    hash += key.charCodeAt(i);
+  }
+  return hash % 37;
+};
+
+HashTable.prototype.ValuePair = function(key, value) {
+  this.key = key;
+  this.value = value;
+  this.toString = function() {
+    return `[#${this.key}: ${this.value}]`;
+  };
+};
+
+HashTable.prototype.put = function(key, value) {
+  if (key !== null && value !== null) {
+    const position = this.loseloseHashCode(key);
+    this.table[position] = new this.ValuePair(key, value);
+    return true;
+  }
+  return false;
+};
+
+HashTable.prototype.remove = function(key) {
+  const position = this.loseloseHashCode(key);
+  const valuePair = this.table[position];
+  if (valuePair !== undefined) {
+    delete this.table[position];
+    return true;
+  }
+  return false;
+};
+
+HashTable.prototype.get = function(key) {
+  const valuePair = this.table[this.loseloseHashCode(key)];
+  return valuePair === undefined ? undefined : valuePair.value;
+};
+
+HashTable.prototype.print = function() {
+  for (var i = 0; i < this.table.length; i++) {
+    if (this.table[i] !== undefined) {
+      console.log(i + ": " + this.table[i]);
+    }
+  }
+};
+
+// Create, populate, print hash table
+const testHash = new HashTable();
+testHash.put("1", "John");
+testHash.put("2", "Kate");
+testHash.put("3", "Michael");
+testHash.print();
+
+// Remove "Kate" by key and print hash table again
+testHash.remove("2");
+testHash.print();
+
+// Try to get "Kate" by key and print to console (should return undefined)
+console.log("The value at key #2 is " + testHash.get("2"));
+
+// Get "John" by key and print to console
+console.log("The value at key #1 is " + testHash.get("1"));
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
