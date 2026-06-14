@@ -1,0 +1,528 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 5 Programming Project</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the prototype approach.
+//       This is not what the book uses, so you have to convert it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//---------//
+// Project //
+//---------//
+console.log("Project");
+
+// 1. Implement the tree data structure using the prototype (see below). Note
+//    that we have helper functions that we have to deal with, and we simply
+//    make them part of the prototype but prepend them with _, e.g., _insertNode
+//    below. This is a common convention/solution. Programmers using a tree
+//    object are not supposed to use _ methods (or properties) directly. Run
+//    some tests that show that your code works.
+
+function Node(key) {
+  this.key = key;
+  this.left = null;
+  this.right = null
+}
+
+function BinarySearchTree() {
+  // the root node
+  this.root = null;
+}
+
+// helper functions
+BinarySearchTree.prototype._insertNode = function(node, newNode) {
+  // node is the node we want to insert into
+  // newNode is the node we want to insert
+  if (newNode.key < node.key) {
+    // go to left
+    if (node.left === null) {
+      // no left node yet so assign
+      node.left = newNode;
+    }
+    else {
+      // move down tree and repeat
+      this._insertNode(node.left, newNode);
+    }
+  }
+  else {
+    // go to right
+    if (node.right === null) {
+      // no right node yet so assign
+      node.right = newNode;
+    }
+    else {
+      // move down tree and repeat
+      this._insertNode(node.right, newNode);
+    }
+  }
+}
+
+BinarySearchTree.prototype._searchNode = function(node, key) {
+  if (node == null) {
+    return false;
+  }
+  if (key < node.key) {
+    return this._searchNode(node.left, key);
+  }
+  else if (key > node.key) {
+    return this._searchNode(node.right, key);
+  }
+  else {
+    return true;
+  }
+}
+
+BinarySearchTree.prototype._removeNode = function(node, key) {
+  if (node == null) {
+    return null;
+  }
+  if (key < node.key) {
+    node.left = this._removeNode(node.left, key);
+    return node;
+  }
+  else if (key > node.key) {
+    node.right = this._removeNode(node.right, key);
+    return node;
+  }
+  else {
+    // case 1
+    if (node.left == null && node.right == null) {
+      node = null;
+      return node;
+    }
+    // case 2
+    if (node.left == null) {
+      node = node.right;
+      return node;
+    }
+    else if (node.right == null) {
+      node = node.left;
+      return node;
+    }
+    // case 3
+    const aux = this._minNode(node.right);
+    node.key = aux.key;
+    node.right = this._removeNode(node.right, aux.key);
+    return node;
+  }
+}
+
+BinarySearchTree.prototype._minNode = function(node) {
+  let current = node;
+  while (current != null && current.left != null) {
+    current = current.left;
+  }
+  return current;
+}
+
+BinarySearchTree.prototype._maxNode = function(node) {
+  let current = node;
+  while (current != null && current.right != null) {
+    current = current.right;
+  }
+  return current;
+}
+
+BinarySearchTree.prototype._inOrderTraverseNode = function(node, callback) {
+  if (node != null) {
+    this._inOrderTraverseNode(node.left, callback);
+    callback(node.key);
+    this._inOrderTraverseNode(node.right, callback);
+  }
+}
+
+BinarySearchTree.prototype._preOrderTraverseNode = function(node, callback) {
+  if (node != null) {
+    callback(node.key);
+    this._preOrderTraverseNode(node.left, callback);
+    this._preOrderTraverseNode(node.right, callback);
+  }
+}
+
+BinarySearchTree.prototype._postOrderTraverseNode = function(node, callback) {
+  if (node != null) {
+    this._postOrderTraverseNode(node.left, callback);
+    this._postOrderTraverseNode(node.right, callback);
+    callback(node.key);
+  }
+}
+
+BinarySearchTree.prototype.insert = function(key) {
+  // insert new key in the tree
+  var newNode = new Node(key);
+  if (this.root === null) {
+    // no nodes yet
+    this.root = newNode;
+  }
+  else {
+    // find insert location through insertNode
+    this._insertNode(this.root, newNode);
+  }
+}
+
+BinarySearchTree.prototype.search = function(key) {
+  // search for key and return true if found, false otherwise
+  return this._searchNode(this.root, key);
+}
+
+BinarySearchTree.prototype.remove = function(key) {
+  // removes the key from the tree
+  this.root = this._removeNode(this.root, key)
+}
+
+BinarySearchTree.prototype.min = function() {
+  // return the minimum key in the tree
+  return this._minNode(this.root);
+}
+
+BinarySearchTree.prototype.max = function() {
+  // return the maximum key in the tree
+  return this._maxNode(this.root);
+}
+
+BinarySearchTree.prototype.inOrderTraverse = function(callback) {
+  // visit all nodes of the tree using in-order traversal
+  // call callback with each key encountered
+  this._inOrderTraverseNode(this.root, callback);
+}
+
+BinarySearchTree.prototype.preOrderTraverse = function(callback) {
+  // visit all nodes of the tree using pre-order traversal
+  // call callback with each key encountered
+  this._preOrderTraverseNode(this.root, callback);
+}
+
+BinarySearchTree.prototype.postOrderTraverse = function(callback) {
+  // visit all nodes of the tree using post-order traversal
+  // call callback with each key encountered
+  this._postOrderTraverseNode(this.root, callback);
+}
+
+BinarySearchTree.prototype.print = function() {
+  function print(node) {
+    // check if not is not null
+    if (node !== null) {
+      // text for left child
+      var leftChild = node.left !== null ? node.left.key : "None";
+      // text for right child
+      var rightChild = node.right !== null ? node.right.key : "None";
+      // print output
+      console.log(leftChild + " <-- " + node.key + " --> " + rightChild);
+      // traverse left
+      print(node.left);
+      // traverse right
+      print(node.right);
+    }
+  }
+  console.log("===tree===");
+  print(this.root);
+  console.log("==========");
+}
+
+
+// Uncomment to test you code:
+
+var tree = new BinarySearchTree();
+tree.insert(11);
+tree.insert(7);
+tree.insert(15);
+tree.insert(5);
+tree.insert(3);
+tree.insert(9);
+tree.insert(8);
+tree.insert(10);
+tree.insert(13);
+tree.insert(12);
+tree.insert(14);
+tree.insert(20);
+tree.insert(18);
+tree.insert(25);
+tree.insert(6);
+tree.print();
+
+// You need to use this function below.
+
+function printNode(value) {
+  console.log(value);
+}
+
+
+
+// 2. Implement in-order traversal using the prototype. Test your
+//    implementation with the printNode() function given above.
+//    NOTE: in-order means all keys are visited in sorted order.
+
+console.log("In-order Traversal");
+// printNode function passed as callback
+tree.inOrderTraverse(printNode);
+
+
+
+// 3. Implement pre-order traversal using the prototype. Test your
+//    implementation with the printNode() function given above.
+//    NOTE: pre-order means a node is visited prior to its descendants.
+
+console.log("Pre-order Traversal");
+tree.preOrderTraverse(printNode);
+
+
+
+// 4. Implement post-order traversal using the prototype. Test your
+//    implementation with the printNode() function given above.
+//    NOTE: pre-order means a node is visited after its descendants.
+
+console.log("Post-order Traversal");
+tree.postOrderTraverse(printNode);
+
+
+console.log("Min/Max");
+// 5. Implement the min method using the prototype and show that it works.
+
+console.log("The minimum node's key is: " + tree.min().key);
+
+
+
+// 6. Implement the max method using the prototype and show that it works.
+
+console.log("The maximum node's key is: " + tree.max().key);
+
+
+
+// 7. Implement the search method using the prototype and show that it works.
+
+console.log("Search");
+//  Search tree for key 50 (does not exist, should print "Key 50 not found.")
+console.log(tree.search(1) ? "Key 50 found." : "Key 50 not found.");
+//  Search tree for key 25 (does exist, should print "Key 8 found.")
+console.log(tree.search(25) ? "Key 25 found." : "Key 25 not found.");
+
+
+
+// 8. Create the tree that is given in the book if you haven't done so yet.
+//    NOTE: Use the one given right before the Tree Traversal section that
+//          includes the 6.
+
+// 9. We want to make a copy of this tree, but want to make sure that the copy
+//    we create is also nicely balanced (since we did not implement AVL). We
+//    can use in-order, pre-order, and post-order traversal to retrieve the
+//    nodes. If we want the new tree to be balanced as well, which order should
+//    we use if we want to insert the nodes in the new tree?
+
+//    We should use pre-order traversal because it starts with the root of the original
+//    tree which will maintain the point of balance between left and right subtrees. 
+
+
+
+// 10 Run the traversal approach you picked in (9) to collect all the keys and
+//    store them in an array.
+
+let keysArray = [];
+tree.preOrderTraverse((key) => keysArray.push(key));
+console.log("Pre-order traversal keys: " + keysArray);
+
+
+
+// 11 Iterate through the array and insert each element inside a new tree. make
+//    sure it is balanced.
+
+console.log("New Tree");
+var tree2 = new BinarySearchTree();
+keysArray.forEach((key) => tree2.insert(key));
+tree2.print();
+
+
+
+// 12 Implement the graph data structure using the prototype.
+
+// Dictionary prototype class for use with Graph structure
+function Dictionary() {
+  this.items = {};
+}
+
+Dictionary.prototype.ValuePair = function(key, value) {
+  this.key = key;
+  this.value = value;
+  this.toString = function(){
+    return `[#${this.key}: ${this.value}]`;
+  }
+};
+
+Dictionary.prototype.defaultToString = function(item) {
+  if (item === null) {
+    return "NULL";
+  }
+  else if (item === undefined) {
+    return "UNDEFINED";
+  }
+  else if (typeof item === "string" || item instanceof String) {
+    return `${item}`;
+  }
+  return item.toString();
+};
+
+Dictionary.prototype.set = function(key, value) {
+  if (key !== null && value !== null) {
+    const itemKey = this.defaultToString(key);
+    this.items[itemKey] = new this.ValuePair(key, value);
+    return true;
+  }
+  return false;
+};
+
+Dictionary.prototype.delete = function(key) {
+  if (this.has(key)) {
+    const itemKey = this.defaultToString(key);
+    delete this.items[itemKey];
+    return true;
+  }
+  return false;
+};
+
+Dictionary.prototype.has = function(key) {
+  return this.items[this.defaultToString(key)] !== undefined;
+};
+
+Dictionary.prototype.get = function(key) {
+  const valueKey = this.items[this.defaultToString(key)];
+  return valueKey === undefined ? undefined : valueKey.value;
+};
+
+Dictionary.prototype.clear = function() {
+  this.items = {};
+};
+
+Dictionary.prototype.size = function() {
+  return Object.keys(this.items).length;
+};
+
+Dictionary.prototype.keys = function() {
+  return Object.keys(this.items);
+};
+
+Dictionary.prototype.values = function() {
+  return Object.values(this.items);
+};
+
+Dictionary.prototype.getItems = function() {
+  return this.items;
+};
+
+Dictionary.prototype.print = function() {
+  this.values().forEach(pair => console.log(pair.toString()));
+};
+
+
+function Graph() {
+  this.vertices = [];
+  this.adjList = new Dictionary();
+}
+
+Graph.prototype.addVertex = function(v) {
+  this.vertices.push(v);
+  this.adjList.set(v, []);
+}
+
+Graph.prototype.addEdge = function(v, w) {
+  this.adjList.get(v).push(w);
+  this.adjList.get(w).push(v);
+}
+
+Graph.prototype.toString = function() {
+  var s = '';
+  for (var i = 0; i < this.vertices.length; i++) {
+    s += this.vertices[i] + ' -> ';
+    var neighbors = this.adjList.get(this.vertices[i]);
+    for (var j = 0; j < neighbors.length; j++) {
+      s += neighbors[j] + ' ';
+    }
+    s += '\n';
+  }
+  return s;
+}
+
+
+
+// 13 Implement Prim's algorithm (use code from the book).
+//    NOTE1: You do not need to use the code from (12) for this question.
+//    NOTE2: Replace INF (used in the book) with Infinity.
+
+//  helper for Prim's algorithm
+var minKey = function(key, visited) {
+  var min = Infinity;
+  var minIndex = -1;
+
+  for (var v = 0; v < key.length; v++) {
+    if (visited[v] == false && key[v] <= min) {
+      min = key[v];
+      minIndex = v;
+    }
+  }
+  return minIndex;
+};
+
+function prim(graph) {
+  var parent = [], key = [], visited = [];
+  length = graph.length;
+
+  for (i = 0; i < length; i++) {
+    key[i] = Infinity;
+    visited[i] = false;
+  }
+
+  key[0] = 0;
+  parent[0] = -1;
+
+  for (i = 0; i < length - 1; i++) {
+    var u = minKey(key, visited);
+    visited[u] = true;
+
+    for (var v = 0; v < length; v++) {
+      if (graph[u][v] && visited[v] == false
+      && graph[u][v] < key[v]) {
+      parent[v] = u;
+      key[v] = graph[u][v];
+      }
+    }
+  }
+  return parent;
+};
+
+// 14 Show that your code works using the example from the book in the minimum
+//    spanning tree section. Print both the edges and the weights that are part
+//    of the minimum spanning tree.
+
+var graph = [[0, 2, 4, 0, 0, 0],
+             [2, 0, 2, 4, 2, 0],
+             [4, 2, 0, 0, 3, 0],
+             [0, 4, 0, 0, 3, 2],
+             [0, 2, 3, 3, 0, 2],
+             [0, 0, 0, 2, 2, 0]];
+
+var parentArray = prim(graph);
+
+function printPrim(graph, parentArray) {
+  for (var i = 1; i < parentArray.length; i++) {
+    console.log("Edge: " + parentArray[i] + " - " + i + "\nWeight: " +  graph[i][parentArray[i]]);
+  }
+}
+
+printPrim(graph, parentArray);
+
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
