@@ -1,0 +1,291 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 7 Programming Project</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the prototype approach.
+//       This is not what the book uses, so you have to convert it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//---------//
+// Project //
+//---------//
+console.log("Project");
+
+// 1. Implement factorial using a recursive function and test your code.
+
+function recursiveFactorial(num) {
+  let product;
+  if (num <= 1) {
+    product = 1;
+  } else {
+    product = num * recursiveFactorial(num - 1);
+  }
+  return product;
+}
+
+console.log("Recursive Factorials");
+console.log("The factorial of 0 is " + recursiveFactorial(0));
+console.log("The factorial of 1 is " + recursiveFactorial(1));
+console.log("The factorial of 4 is " + recursiveFactorial(4));
+
+
+
+// 2. Implement a function that returns the complete fibonacci sequence in an
+//    array for a given number.
+
+function fibonacciArray(end) {
+  let current = 0;
+  let next = 1;
+  const numArray = [current, next];
+
+  function recurse(current, next) {
+    let sum = current + next;
+
+    if (sum > end) {
+      return;
+    } else {
+      numArray.push(sum);
+      recurse(next, sum);
+    }
+  }
+  recurse(current, next);
+  return numArray;
+}
+
+console.log("Fibonacci Sequence");
+console.log("Fibonacci through 55: " + fibonacciArray(55));
+
+
+
+// 3. Implement finding the longest common subsequence using dynamic
+//    programming. Test your code.
+
+function lcs(wordX, wordY) {
+  var m = wordX.length,
+  n = wordY.length,
+  l = [],
+  solution = [],
+  i, j, a, b;
+
+  for (i = 0; i <= m; ++i) {
+    l[i] = [];
+    solution[i] = [];
+    for (j = 0; j <= n; ++j) {
+      l[i][j] = 0;
+      solution[i][j] = '0';
+    }
+  }
+
+  for (i = 0; i <= m; i++) {
+    for (j = 0; j <= n; j++) {
+      if (i == 0 || j == 0) {
+        l[i][j] = 0;
+      } else if (wordX[i - 1] == wordY[j - 1]) {
+        l[i][j] = l[i - 1][j - 1] + 1;
+        solution[i][j] = 'diagonal';
+      } else {
+        a = l[i - 1][j];
+        b = l[i][j - 1];
+        l[i][j] = (a > b) ? a : b;
+        solution[i][j] = (l[i][j] == l[i - 1][j]) ? 'top' : 'left';
+      }
+    }
+  }
+  printSolution(solution, l, wordX, wordY, m, n);
+  return l[m][n];
+}
+
+function printSolution(solution, l, wordX, wordY, m, n) {
+  var a = m, b = n, i, j,
+  x = solution[a][b],
+  answer = '';
+
+  while (x !== '0') {
+    if (solution[a][b] === 'diagonal') {
+      answer = wordX[a - 1] + answer;
+      a--;
+      b--;
+    } else if (solution[a][b] === 'left') {
+      b--;
+    } else if (solution[a][b] === 'top') {
+      a--;
+    }
+    x = solution[a][b];
+  }
+  console.log('LCS: ' + answer);
+}
+
+console.log("Longest Common Subsequence");
+console.log("Strings: 'acbaed', 'abcadf'");
+lcs('acbaed', 'abcadf');
+
+
+
+// 4. Solve the problem of summing all the numbers in an array using
+//    imperative style.
+
+function imperativeSumArr(arr) {
+  let sum = 0;
+  for (let i = 0; i < arr.length; i++) {
+    sum += arr[i];
+  }
+  return sum;
+}
+
+
+let numArr = [5, 12, 17, 21, 25, 33, 47, 50];
+console.log("Sum Arrays");
+console.log("Array: " + numArr);
+console.log("Sum of array is: " + imperativeSumArr(numArr));
+
+
+
+// 5. Solve the problem of summing all the numbers in an array using
+//    functional style.
+
+function functionalSumArr(arr) {
+  return arr.reduce(function(a, b){
+    return a + b;
+  })
+}
+
+let numArr2 = [3, 11, 19, 24, 33, 45, 61, 72, 99];
+console.log("Array: " + numArr2);
+console.log("Sum of array is: " + functionalSumArr(numArr2));
+
+
+
+// 6. Solve problem 14 of Project Euler: https://projecteuler.net/problem=14
+//    Note: This may be a bit challenging. Try to get as far as you can.
+//          Instead of one million you could use a smaller number for testing.
+
+console.log("Longest Collatz Sequence");
+
+
+ // Function to detemine Collatz Sequence of a given number
+function collatzSequence(num) {
+  const sequenceArr = [num];
+
+  function recurse(current) {
+    if (current === 1) {
+    return;
+
+    } else if (current % 2 !== 0) {
+      let nextNum = (current * 3) + 1;
+      sequenceArr.push(nextNum);
+      recurse(nextNum);
+
+    } else if (current % 2 === 0) {
+      let nextNum = current / 2;
+      sequenceArr.push(nextNum);
+      recurse(nextNum);
+    }
+  }
+  recurse(num);
+  return sequenceArr;
+}
+
+
+
+// Recursive caller for collatzSequence() to check each integer and store the length/starting number of the longest chain
+function collatzCaller(num) {
+  let longestSequence = 1;
+  let startingNumber = 1;
+
+  if (num > 1000000 || num < 1) {
+    console.log("ERROR: Max number must be between 1 and 999,999");
+    return;
+  }
+
+
+  function recurse(current) {
+    if (current > num) {
+      return;
+    }
+
+    let sequenceArr = collatzSequence(current);
+    if (sequenceArr.length > longestSequence) {
+      longestSequence = sequenceArr.length;
+      startingNumber = current;
+    }
+    recurse(current + 1);
+  }
+  recurse(1);
+  console.log("Max number: " + num);
+  console.log("Starting number of longest sequence: " + startingNumber);
+  console.log("Length of longest sequence: " + longestSequence);
+}
+
+// Error handling test
+collatzCaller(-5);
+
+collatzCaller(2000);
+
+
+
+// I initially wrote the functions recursively for practice but it causes a stack overflow with large numbers
+// Below are the functions rewritten with loops so they can check numbers up to the max without an error
+
+function collatzSequenceLoop(num) {
+  const sequenceArr = [num];
+
+  while (num > 1) {
+    if (num % 2 === 0) {
+      num = num / 2;
+    } else {
+      num = (num * 3) + 1;
+    }
+    sequenceArr.push(num);
+  }
+  return sequenceArr;
+}
+
+
+
+function collatzCallerLoop(num) {
+  let longestSequence = 1;
+  let startingNumber = 1;
+
+  if (num > 1000000 || num < 1) {
+    console.log("ERROR: Max number must be between 1 and 999,999");
+    return;
+  }
+
+  for (let current = 1; current <= num; current++) {
+    let sequenceArr = collatzSequenceLoop(current);
+
+    if (sequenceArr.length > longestSequence) {
+      longestSequence = sequenceArr.length;
+      startingNumber = current;
+    }
+  }
+  console.log("Max number: " + num);
+  console.log("Starting number of longest sequence: " + startingNumber);
+  console.log("Length of longest sequence: " + longestSequence);
+}
+
+
+// Error handling test
+collatzCallerLoop(8675309);
+// Test with max number to ensure no stack overflow occurs
+collatzCallerLoop(1000000); 
+
+
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
