@@ -1,0 +1,331 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 8 Programming Project</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the prototype approach.
+//       This is not what the book uses, so you have to convert it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//---------//
+// Project //
+//---------//
+console.log("Project");
+
+// 1. What is the worst case complexity of the following function?
+
+function hasDuplicates(arr) {
+  for (var i = 0; i < arr.length; i++) {
+    for (var j = 0; j < arr.length; j++) {
+      if (i !== j && arr[i] === arr[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// The worst case complexity would be O(n^2) in the case where the algorithm needs to compare 
+// every element against each other to check for duplicates.
+
+
+
+// 2. Implement a faster version of the same function and analyze the
+//    complexity of this approach.
+
+function hasDuplicatesFast(arr) {
+  let uniqueNums = new Set(arr);
+  if (uniqueNums.size !== arr.length) {
+    return true;
+  }
+  return false;
+}
+
+// By using a set to store the non-duplicate values, the nested loop can be avoided which reduces
+// the complexity from O(n^2) to O(n). Populating the set is O(n) complexity, while the size comparison 
+// is O(1) complexity. 
+
+
+
+// 3. The travelling salesman problem is a another classic problem and we are
+//    going to solve it using a greedy algorithm. Before starting, please read
+//    through the article on Wikipedia:
+//      https://en.wikipedia.org/wiki/Travelling_salesman_problem
+//    Then implement the following:
+//    (a) Create a graph that represents the example symmetric TSP problem on
+//        the Wikipedia page.
+//    (b) Implement a greedy search that finds the shortest path. You should
+//        have the following steps: (1) pick node A as the starting position,
+//        (2) pick the closest neighbor that has not been visited as the next
+//        city to visit, (3) continue this process until returning to A,
+//        (4) print the final length of the path and also the sequence of
+//        the cities.
+//    (c) Check your results, do they make sense? Is is the optimal solution?
+
+
+function Dictionary() {
+  this.items = {};
+}
+
+  Dictionary.prototype.ValuePair = function(key, value) {
+    this.key = key;
+    this.value = value;
+    this.toString = function(){
+      return `[#${this.key}: ${this.value}]`;
+    }
+  }
+
+  Dictionary.prototype.defaultToString = function(item) {
+    if (item === null) {
+      return "NULL";
+    }
+    else if (item === undefined) {
+      return "UNDEFINED";
+    }
+    else if (typeof item === "string" || item instanceof String) {
+      return `${item}`;
+    }
+    return item.toString();
+  };
+
+  Dictionary.prototype.set = function(key, value) {
+    if (key !== null && value !== null) {
+      const itemKey = this.defaultToString(key);
+      this.items[itemKey] = new this.ValuePair(key, value);
+      return true;
+    }
+    return false;
+  };
+
+  Dictionary.prototype.delete = function(key) {
+    if (this.has(key)) {
+      const itemKey = this.defaultToString(key);
+      delete this.items[itemKey];
+      return true;
+    }
+    return false;
+  };
+
+  Dictionary.prototype.has = function(key) {
+    return this.items[this.defaultToString(key)] !== undefined;
+  };
+
+  Dictionary.prototype.get = function(key) {
+    const valueKey = this.items[this.defaultToString(key)];
+    return valueKey === undefined ? undefined : valueKey.value;
+  };
+
+  Dictionary.prototype.clear = function() {
+    this.items = {};
+  };
+
+  Dictionary.prototype.size = function() {
+    return Object.keys(this.items).length;
+  };
+
+  Dictionary.prototype.keys = function() {
+    return Object.keys(this.items);
+  };
+
+  Dictionary.prototype.values = function() {
+    return Object.values(this.items);
+  };
+
+  Dictionary.prototype.getItems = function() {
+    return this.items;
+  };
+
+
+
+function Graph(directed = false) {
+  this.vertices = [];
+  this.isDirected = directed;
+  this.adjList = new Dictionary();
+}
+
+  Graph.prototype.addVertex = function(v) {
+    if (!this.vertices.includes(v)) {
+      this.vertices.push(v);
+      this.adjList.set(v, []);
+    }
+  };
+
+  Graph.prototype.addEdge = function(v, w, weight) {
+    if (!this.adjList.get(v)) {
+      this.addVertex(v);
+    }
+    if (!this.adjList.get(w)) {
+      this.addVertex(w);
+    }
+    this.adjList.get(v).push({node: w, weight: weight});
+    if (!this.isDirected) {
+      this.adjList.get(w).push({node: v, weight: weight});
+    }
+  };
+
+  Graph.prototype.getVertices = function() {
+    return this.vertices;
+  };
+
+  Graph.prototype.getWeight = function(v, w) {
+    let neighbors = this.adjList.get(v);
+    if (!neighbors) {
+      return Infinity;
+    } else {
+      let edge = neighbors.find(function(edge) {
+        return edge.node === w;
+      });
+      if (edge) {
+        return edge.weight;
+      } else {
+        return Infinity;
+      }
+    }
+  };
+
+
+const cityGraph = new Graph();
+// Will calculate the fastest route to reach five major PA cities
+// Weights are the distance of the fastest route in miles according to Google Maps
+// No duplicate edges because the graph is undirected
+cityGraph.addVertex("Pittsburgh");
+cityGraph.addVertex("Erie");
+cityGraph.addVertex("Harrisburg");
+cityGraph.addVertex("Philadelphia");
+cityGraph.addVertex("State College");
+cityGraph.addEdge("Pittsburgh", "Erie", 128);
+cityGraph.addEdge("Pittsburgh", "Harrisburg", 203);
+cityGraph.addEdge("Pittsburgh", "Philadelphia", 305);
+cityGraph.addEdge("Pittsburgh", "State College", 140);
+cityGraph.addEdge("Erie", "Harrisburg", 296);
+cityGraph.addEdge("Erie", "Philadelphia", 426);
+cityGraph.addEdge("Erie", "State College", 209);
+cityGraph.addEdge("Harrisburg", "Philadelphia", 110);
+cityGraph.addEdge("Harrisburg", "State College", 86);
+cityGraph.addEdge("Philadelphia", "State College", 192);
+
+
+function greedySearch(start) {
+  let cities = cityGraph.getVertices();
+  let visited = [start];
+  let remaining = cities.filter(function(city) {
+    return city !== start;
+  });
+
+  let path = [start];
+  let totalDistance = 0;
+  let current = start;
+
+  // Find closest city until remaining array is empty
+  while (remaining.length > 0) {
+    let closest = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      let next = remaining[i];
+      let distance = cityGraph.getWeight(current, next);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closest = next;
+      }
+    }
+    visited.push(closest);
+    path.push(closest);
+    totalDistance += minDistance;
+    current = closest;
+
+    remaining = remaining.filter(function(city) {
+      return city !== closest;
+    });
+  }
+  // Add distance from final city back to starting point
+  totalDistance += cityGraph.getWeight(current, start);
+  path.push(start);
+
+  // Print path and distance
+  console.log("Path: " + path.join());
+  console.log("Distance: " + totalDistance + " miles");
+}
+
+
+// First test starting from Pittsburgh
+// Produces a logical route, first going north to Erie and then working its way east through State College, Harrisburg, and Philadelphia
+greedySearch("Pittsburgh");
+
+// Interestingly, State College produces the same distance output which I thought was a bug at first
+// However upon further investigation, the order of the cities is the same with a different starting point
+// This does make sense because the algorithm returns to the starting point at the end which makes the path a loop 
+greedySearch("State College");
+
+// Starting with Harrisburg confirmed that the algorithm does produce different distance results when the order of the cities is different
+greedySearch("Harrisburg");
+
+
+
+// 4. Solve https://csacademy.com/contest/interview-archive/task/intersecting-rectangles/
+//    What is the runtime complexity of your solution?
+//    HINT: Try to break down the problems into smaller steps. For example,
+//          find a convenient way to represent rectangles and define a function
+//          that tests whether one rectangle is inside another. Then test your
+//          code on just two rectangles first to make sure it works.
+
+function createRectangle(x1, y1, x2, y2) {
+  return { x1, y1, x2, y2 };
+}
+
+function intersect(a, b) {
+  return a.x1 < b.x2 && b.x1 < a.x2 &&
+         a.y1 < b.y2 && b.y1 < a.y2;
+}
+
+function countIntersects(rectangleArr) {
+  let intersects = 0;
+
+  for (let i = 0; i < rectangleArr.length; i++) {
+    for (let j = i + 1; j < rectangleArr.length; j++) {
+      if (intersect(rectangleArr[i], rectangleArr[j])) {
+        intersects++;
+      }
+    }
+  }
+  return intersects;
+}
+
+// Test 1 from the problem, produces a value of 1
+const rec1 = createRectangle(1, 1, 7, 10);
+const rec2 = createRectangle(3, 5, 10, 8);
+console.log(countIntersects([rec1, rec2]));
+
+// Test 2 from the problem, produces a value of 0
+const rec3 = createRectangle(3, 2, 5, 8);
+const rec4 = createRectangle(7, 3, 10, 10);
+console.log(countIntersects([rec3, rec4]));
+
+// Test 3 from the problem, produces a value of 2
+const rec5 = createRectangle(1, 1, 5, 5);
+const rec6 = createRectangle(3, 2, 6, 4);
+const rec7 = createRectangle(4, 8, 8, 10);
+const rec8 = createRectangle(3, 9, 7, 10);
+console.log(countIntersects([rec5, rec6, rec7, rec8]));
+
+// The runtime complexity of the solution is O(n^2) because the nested loop
+// compares every rectangle to all other rectangles to check for overlap. 
+
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
