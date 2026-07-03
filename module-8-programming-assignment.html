@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CMPS 260: Module 8 Programming Assignment</title>
+<style>* { font-family: monospace; }</style>
+<script>
+
+// NOTE: You must implement the data structures using the no prototype approach.
+//       This is what the book uses, so you can copy it.
+//       See also: https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+
+// NOTE: Please review the following links regularly:
+//       https://it.pointpark.edu/tutorials/arrays-vs-objects/
+//       https://it.pointpark.edu/tutorials/no-prototype-vs-prototype/
+//       https://it.pointpark.edu/tutorials/implementation-vs-interface/
+
+
+
+//----------------//
+// Big O notation //
+//----------------//
+console.log("Big O notation");
+
+// 1. Analyze the complexity of the isPalindrome function below. Make a
+//    distinction between best, worst, and average case complexity.
+
+function isPalindrome(str) {
+  for (var i = 0; i < str.length/2; i++) {
+    if (str[i] !== str[str.length-i-1]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+//  The best case complexity for the function is O(1). If the function 
+//  compares the first and last letter and they do not match, it will 
+//  immediately return false. 
+
+//  Average case complexity will likely be O(1) as well since a string
+//  taken at random will probably not having matching first and last letters.
+
+//  Worst case complexity is O(n). If the provided string is a palindrome, the
+//  function will have to iterate through the string to make sure each letter matches.
+
+
+
+// 2. Write a program that finds the minimum element in a stack in O(1) time
+//    complexity. Note that earlier solutions searched through the elements on
+//    the stack but that leads to an O(n) solution.
+//    NOTE: this question is sometimes asked on interviews.
+
+function Stack() {
+  var items = [];
+//  minStack to keep track of minimum value
+  var minStack = [];
+
+  this.push = function(element) {
+    items.push(element);
+    let min;
+    // if minStack is empty, set element as the minimum value
+    if (minStack.length === 0) {
+      min = element;
+    // otherwise set to top value of the minStack (current minimum)
+    } else {
+      min = minStack[minStack.length - 1];
+    }
+    // compare min with element and push whichever is lower to the minStack
+    minStack.push(Math.min(element, min));
+  }
+
+  this.pop = function() {
+    if (items.length === 0) {
+      return undefined;
+    }
+    minStack.pop();
+    return items.pop();
+  }
+
+  this.peek = function() {
+    if (items.length === 0) {
+      return undefined;
+    }
+    return items[items.length - 1];
+  }
+
+  this.isEmpty = function() {
+    return items.length === 0;
+  }
+
+  this.clear = function() {
+    items.length = 0;
+    console.log("Stack cleared.");
+  }
+
+  this.size = function() {
+    return items.length;
+  }
+
+  this.getMinElement = function() {
+    if (minStack.length === 0) {
+      return undefined;
+    }
+    // direct lookup of the top element of minStack will return minimum value in O(1) time complexity
+    return minStack[minStack.length - 1];
+  }
+}
+
+let numStack = new Stack();
+// Error handling test (should return undefined for both calls)
+console.log(numStack.pop());
+console.log(numStack.getMinElement());
+// Populate stack and get minimum element (1)
+numStack.push(5);
+numStack.push(7);
+numStack.push(9);
+numStack.push(2);
+numStack.push(1);
+numStack.push(12);
+console.log("The minimum element in the stack is " + numStack.getMinElement());
+
+
+
+//----------------------------//
+// Having fun with algorithms //
+//----------------------------//
+console.log("Having fun with algorithms");
+
+// 1. Solve Project Euler problem 1 (https://projecteuler.net/problem=1).
+
+function sumMultiples() {
+  let sum = 0;
+  for (let i = 3; i < 1000; i++) {
+    if (i % 3 === 0 || i % 5 === 0) {
+      sum += i;
+    }
+  }
+  return sum;
+}
+
+console.log(sumMultiples());
+
+// 2. Solve Project Euler problem 2 (https://projecteuler.net/problem=2).
+
+function evenFibonacciSum(limit=4000000) {
+  let sum = 0;
+  let a = 1;
+  let b = 2;
+
+  while (b < limit) {
+    if (b % 2 === 0) {
+      sum += b;
+    }
+    let next = a + b;
+    a = b;
+    b = next;
+  }
+  return sum;
+}
+
+console.log("The sum of the even Fibonacci numbers up to 4000000 is: " + evenFibonacciSum());
+
+</script>
+</head>
+<body>
+  See console!
+</body>
+</html>
